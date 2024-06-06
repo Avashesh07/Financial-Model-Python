@@ -49,7 +49,6 @@ def main():
         ("E", [electricity_price, electrolysis_ratio, 0, 0, fractionation_ratio, 0, 0, 0, 0, 0], "Supplying only electricity"),
         ("W", [0, 0, 0, 0, 0, 0, 0, water_price, water_quantity, 0], "Supplying only water for electrolysis"),
         ("EP", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, 0, 0, 0, water_price, water_quantity, 0], "Producing hydrogen through electrolysis"),
-        ("H", [0, 0, hydrogen_price, hydrogen_quantity, 0, 0, 0, 0, 0, 0], "Handling and selling hydrogen"),
         ("CO2", [0, 0, 0, 0, 0, co2_price, co2_quantity, 0, 0, 0], "Acquiring and selling CO2"),
         ("C", [electricity_price, electrolysis_ratio, 0, 0, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Converting hydrogen and CO2 to eSAF"),
         ("E + W", [electricity_price, 0, 0, 0, 0, 0, 0, water_price, water_quantity, 0], "Supplying electricity and water for electrolysis"),

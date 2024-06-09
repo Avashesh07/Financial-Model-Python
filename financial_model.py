@@ -50,14 +50,14 @@ def main():
         ("W", [0, 0, 0, 0, 0, 0, 0, water_price, water_quantity, 0], "Supplying only water for electrolysis"),
         ("EP", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, 0, 0, 0, water_price, water_quantity, 0], "Producing hydrogen through electrolysis"),
         ("CO2", [0, 0, 0, 0, 0, co2_price, co2_quantity, 0, 0, 0], "Acquiring and selling CO2"),
-        ("C", [electricity_price, electrolysis_ratio, 0, 0, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Converting hydrogen and CO2 to eSAF"),
-        ("E + W", [electricity_price, 0, 0, 0, 0, 0, 0, water_price, water_quantity, 0], "Supplying electricity and water for electrolysis"),
+        ("C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Converting hydrogen and CO2 to eSAF"),
+        ("E + W", [electricity_price, electrolysis_ratio, 0, 0, 0, 0, 0, water_price, water_quantity, 0], "Supplying electricity and water for electrolysis"),
         ("E + EP", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, 0, 0, 0, water_price, water_quantity, 0], "Supplying electricity and producing hydrogen"),
-        ("E + CO2", [electricity_price, 0, 0, 0, 0, co2_price, co2_quantity, 0, 0, 0], "Supplying electricity and acquiring CO2"),
+        ("E + CO2", [electricity_price, electrolysis_ratio, 0, 0, 0, co2_price, co2_quantity, 0, 0, 0], "Supplying electricity and acquiring CO2"),
         ("E + C", [electricity_price, electrolysis_ratio, 0, 0, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying electricity and converting to eSAF"),
-        ("W + EP", [0, electrolysis_ratio, hydrogen_price, hydrogen_quantity, 0, 0, 0, water_price, water_quantity, 0], "Supplying water and producing hydrogen"),
-        ("W + CO2", [0, electrolysis_ratio, 0, 0, 0, co2_price, co2_quantity, water_price, water_quantity, 0], "Supplying water and acquiring CO2"),
-        ("W + C", [0, electrolysis_ratio, 0, 0, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying water and converting to eSAF"),
+        ("W + EP", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, 0, 0, 0, water_price, water_quantity, 0], "Supplying water and producing hydrogen"),
+        ("W + CO2", [electricity_price, electrolysis_ratio, 0, 0, 0, co2_price, co2_quantity, water_price, water_quantity, 0], "Supplying water and acquiring CO2"),
+        ("W + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying water and converting to eSAF"),
         ("EP + CO2", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, 0, co2_price, co2_quantity, water_price, water_quantity, 0], "Producing hydrogen and acquiring CO2"),
         ("EP + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Producing hydrogen and converting to eSAF"),
         ("CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Acquiring CO2 and converting to eSAF"),
@@ -83,7 +83,6 @@ def main():
     # Define the function to calculate costs and revenue based on the scenario
     def calculate_costs_and_revenue(scenario, values):
         electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price = values[:10]
-        energy_needed = electrolysis_ratio + fractionation_ratio
 
         # Calculate costs
         electricity_cost = 0
@@ -99,41 +98,43 @@ def main():
             water_cost += calculate_water_cost(water_price, water_quantity)
             hydrogen_cost = 0  # Hydrogen cost is 0 when we are producing it internally
 
+
+
+        # Check if we supply water
+        if re.search(r'\bW\b', scenario) and not re.search(r'\bEP\b', scenario):
+            revenue += calculate_water_cost(water_price, water_quantity)
+            water_cost = 0
+        elif not re.search(r'\bW\b', scenario) and re.search(r'\bEP\b', scenario):
+            water_cost += calculate_water_cost(water_price, water_quantity)
+
+        # Check if we supply electricity
+        if re.search(r'\bE\b', scenario) and not re.search(r'\b(EP)\b', scenario):
+            revenue += electricity_price * electrolysis_ratio  # Revenue from selling electricity
+            electricity_cost = 0  # No production cost if just selling electricity
+        
+        if re.search(r'\bE\b', scenario) and not re.search(r'\b(C)\b', scenario):
+            revenue += electricity_price * electrolysis_ratio  # Revenue from selling electricity
+            electricity_cost += electricity_price * fractionation_ratio
+
+        if re.search(r'\bEP\b', scenario) and not re.search(r'\bC\b', scenario):
+            revenue += hydrogen_price * hydrogen_quantity  # Revenue from selling hydrogen
+
+        if re.search(r'\bCO2\b', scenario) and not re.search(r'\bC\b', scenario):
+            revenue += co2_price * co2_quantity  # Revenue from selling CO2
+            co2_cost = 0
+
+ 
         # Check if we convert to eSAF
         if re.search(r'\bC\b', scenario):
             electricity_cost += calculate_electricity_cost(electricity_price, fractionation_ratio)
             co2_cost += calculate_co2_cost(co2_price, co2_quantity)
+            revenue += esaf_selling_price
             if not re.search(r'\bEP\b', scenario):
                 hydrogen_cost += calculate_hydrogen_cost(hydrogen_price, hydrogen_quantity)  # Hydrogen cost if not produced internally
+                print(f"Scenario: {scenario}, CO2 Price: {co2_price}, H2 cost: {hydrogen_cost}")
 
-
-        # Check if we acquire and sell CO2
-        if re.search(r'\bCO2\b', scenario) and not re.search(r'\bC\b', scenario):
-            co2_cost += calculate_co2_cost(co2_price, co2_quantity)
-
-        # Check if we supply water
-        if re.search(r'\bW\b', scenario) and not re.search(r'\bEP\b', scenario):
-            water_cost += calculate_water_cost(water_price, water_quantity)
-
-        # Check if we supply electricity
-        if re.search(r'\bE\b', scenario) and not re.search(r'\b(EP|C)\b', scenario):
-            revenue += electricity_price * electrolysis_ratio  # Revenue from selling electricity
-            electricity_cost = 0  # No production cost if just selling electricity
 
         total_production_cost = calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, water_cost)
-
-        # Calculate revenue based on the scenario
-        if re.search(r'\bC\b', scenario):
-            revenue += esaf_selling_price  # Revenue from selling eSAF
-
-        if re.search(r'\bEP\b', scenario) and not re.search(r'\bH\b', scenario):
-            revenue += hydrogen_price * hydrogen_quantity  # Revenue from selling hydrogen
-
-        if re.search(r'\bH\b', scenario) and not re.search(r'\bEP\b', scenario):
-            revenue += hydrogen_price * hydrogen_quantity  # Revenue from handling and selling hydrogen
-
-        if re.search(r'\bCO2\b', scenario) and not re.search(r'\bC\b', scenario):
-            revenue += co2_price * co2_quantity  # Revenue from selling CO2
 
         profit = calculate_profit(revenue, total_production_cost)
 

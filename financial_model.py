@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import re
 
-
 def calculate_electricity_cost(electricity_price, energy_needed):
     return electricity_price * energy_needed
 
@@ -28,7 +27,6 @@ def calculate_payback_period(capex, daily_profit):
         return capex / daily_profit
     else:
         return float('inf')  # Infinite if daily profit is zero or negative
-
 
 def main():
     # Get user inputs
@@ -59,13 +57,11 @@ def main():
     annualized_capex_co2_capture = capex_co2_capture / useful_life_years
     annualized_capex_esaf_production = capex_esaf_production / useful_life_years
 
-
     # Initialize results list
     results = []
- 
-     # Define scenarios
+
+    # Define scenarios
     scenarios = [
-                 
         ("E", [electricity_price, electrolysis_ratio, 0, 0, fractionation_ratio, 0, 0, 0, 0, 0], "Supplying only electricity", 0),
         ("W", [0, 0, 0, 0, 0, 0, 0, water_price, water_quantity, 0], "Supplying only water for electrolysis", 0),
         ("EP", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, 0, 0, 0, water_price, water_quantity, 0], "Producing hydrogen through electrolysis", annualized_capex_electrolysis + annualized_capex_hydrogen_storage),
@@ -90,14 +86,14 @@ def main():
         ("W + EP + CO2", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, 0, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying water, producing hydrogen, and acquiring CO2", annualized_capex_electrolysis + annualized_capex_hydrogen_storage + annualized_capex_co2_capture),
         ("W + EP + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying water, producing hydrogen, and converting to eSAF", annualized_capex_electrolysis + annualized_capex_hydrogen_storage + annualized_capex_esaf_production),
         ("W + CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying water, acquiring CO2, and converting to eSAF", annualized_capex_co2_capture + annualized_capex_esaf_production),
-        ("EP + CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Producing hydrogen, acquiring CO2, and converting to eSAF"), annualized_capex_electrolysis + annualized_capex_hydrogen_storage + annualized_capex_co2_capture + annualized_capex_esaf_production,
+        ("EP + CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Producing hydrogen, acquiring CO2, and converting to eSAF", annualized_capex_electrolysis + annualized_capex_hydrogen_storage + annualized_capex_co2_capture + annualized_capex_esaf_production),
         ("H + CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Handling hydrogen, acquiring CO2, and converting to eSAF", annualized_capex_co2_capture + annualized_capex_esaf_production),
         ("E + W + EP + CO2", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, 0, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying electricity, water, producing hydrogen, and acquiring CO2", annualized_capex_electrolysis + annualized_capex_hydrogen_storage),
         ("E + W + EP + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying electricity, water, producing hydrogen, and converting to eSAF", annualized_capex_electrolysis + annualized_capex_hydrogen_storage + annualized_capex_esaf_production),
         ("E + W + CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying electricity, water, acquiring CO2, and converting to eSAF", annualized_capex_co2_capture + annualized_capex_esaf_production),
         ("E + EP + CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying electricity, producing hydrogen, acquiring CO2, and converting to eSAF", annualized_capex_electrolysis + annualized_capex_hydrogen_storage + annualized_capex_co2_capture + annualized_capex_esaf_production),
         ("W + EP + CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying water, producing hydrogen, acquiring CO2, and converting to eSAF", annualized_capex_electrolysis + annualized_capex_hydrogen_storage + annualized_capex_co2_capture + annualized_capex_esaf_production),
-        ("E + W + EP + CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying electricity, water, producing hydrogen, acquiring CO2, and converting to eSAF", annualized_capex_electrolysis + annualized_capex_hydrogen_storage + annualized_capex_co2_capture + annualized_capex_esaf_production),
+        ("E + W + EP + CO2 + C", [electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price], "Supplying electricity, water, producing hydrogen, acquiring CO2, and converting to eSAF", annualized_capex_electrolysis + annualized_capex_hydrogen_storage + annualized_capex_co2_capture + annualized_capex_esaf_production)
     ]
 
     # Define the function to calculate costs and revenue based on the scenario
@@ -117,8 +113,6 @@ def main():
             electricity_cost += calculate_electricity_cost(electricity_price, electrolysis_ratio)
             water_cost += calculate_water_cost(water_price, water_quantity)
             hydrogen_cost = 0  # Hydrogen cost is 0 when we are producing it internally
-
-
 
         # Check if we supply water
         if re.search(r'\bW\b', scenario) and not re.search(r'\bEP\b', scenario):
@@ -143,7 +137,6 @@ def main():
             revenue += co2_price * co2_quantity  # Revenue from selling CO2
             co2_cost = 0
 
- 
         # Check if we convert to eSAF
         if re.search(r'\bC\b', scenario):
             electricity_cost += calculate_electricity_cost(electricity_price, fractionation_ratio)
@@ -151,8 +144,6 @@ def main():
             revenue += esaf_selling_price
             if not re.search(r'\bEP\b', scenario):
                 hydrogen_cost += calculate_hydrogen_cost(hydrogen_price, hydrogen_quantity)  # Hydrogen cost if not produced internally
-                print(f"Scenario: {scenario}, CO2 Price: {co2_price}, H2 cost: {hydrogen_cost}")
-
 
         total_production_cost = calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, water_cost, annualized_capex)
 
@@ -179,11 +170,6 @@ def main():
         results.append(result)
 
     # Convert results to DataFrame
-    results_df = pd.DataFrame(results)
-
-    # Display results
-    print(results_df)
-        # Convert results to DataFrame
     results_df = pd.DataFrame(results)
 
     # Display results

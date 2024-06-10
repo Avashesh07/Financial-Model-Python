@@ -23,6 +23,13 @@ def calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, w
 def calculate_profit(revenue, total_cost):
     return revenue - total_cost
 
+def calculate_payback_period(capex, daily_profit):
+    if daily_profit > 0:
+        return capex / daily_profit
+    else:
+        return float('inf')  # Infinite if daily profit is zero or negative
+
+
 def main():
     # Get user inputs
     st.title("Financial Model for eSAF Production")
@@ -38,6 +45,19 @@ def main():
     water_price = st.number_input("Enter the price of water per cubic meter:", value=0.0)
     water_quantity = st.number_input("Enter the quantity of water required in cubic meters:", value=7.0)
     esaf_selling_price = st.number_input("Enter the selling price of eSAF per cubic meter:", value=2750.0)
+
+    # Define CAPEX values and useful life
+    capex_electrolysis = st.number_input("Enter the CAPEX for the electrolyser:", value=1000000)  # €1,000,000 for Electrolysis Equipment
+    capex_hydrogen_storage = st.number_input("Enter the CAPEX for the hydrogen storage:", value=500000)  # €500,000 for Hydrogen Storage
+    capex_co2_capture = st.number_input("Enter the CAPEX for the CO2 capturing infrastructure:", value=800000)  # €800,000 for CO2 Capture and Storage
+    capex_esaf_production = st.number_input("Enter the CAPEX for the ATJ factory:", value=2000000)  # €2,000,000 for eSAF Production Facility
+    useful_life_years = st.number_input("Enter the selling price of eSAF per cubic meter:", value=10)  # Useful life of the assets in years
+
+    # Calculate annualized CAPEX
+    annualized_capex_electrolysis = capex_electrolysis / useful_life_years
+    annualized_capex_hydrogen_storage = capex_hydrogen_storage / useful_life_years
+    annualized_capex_co2_capture = capex_co2_capture / useful_life_years
+    annualized_capex_esaf_production = capex_esaf_production / useful_life_years
 
 
     # Initialize results list
@@ -81,7 +101,7 @@ def main():
     ]
 
     # Define the function to calculate costs and revenue based on the scenario
-    def calculate_costs_and_revenue(scenario, values):
+    def calculate_costs_and_revenue(scenario, values, annualized_capex):
         electricity_price, electrolysis_ratio, hydrogen_price, hydrogen_quantity, fractionation_ratio, co2_price, co2_quantity, water_price, water_quantity, esaf_selling_price = values[:10]
 
         # Calculate costs
@@ -134,7 +154,7 @@ def main():
                 print(f"Scenario: {scenario}, CO2 Price: {co2_price}, H2 cost: {hydrogen_cost}")
 
 
-        total_production_cost = calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, water_cost)
+        total_production_cost = calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, water_cost, annualized_capex)
 
         profit = calculate_profit(revenue, total_production_cost)
 
@@ -145,14 +165,17 @@ def main():
             "Hydrogen Cost (€)": hydrogen_cost,
             "CO2 Cost (€)": co2_cost,
             "Water Cost (€)": water_cost,
+            "Annualized CAPEX (€)": annualized_capex,
             "Total Production Cost (€)": total_production_cost,
             "Revenue (€)": revenue,
             "Profit (€)": profit
         }
 
     # Loop through scenarios and calculate costs and profits
-    for scenario, values, description in scenarios:
-        result = calculate_costs_and_revenue(scenario, values)
+    for scenario, values, description, annualized_capex in scenarios:
+        result = calculate_costs_and_revenue(scenario, values, annualized_capex)
+        payback_period_days = calculate_payback_period(annualized_capex * useful_life_years, result["Profit (€)"])
+        result["Payback Period (days)"] = payback_period_days
         results.append(result)
 
     # Convert results to DataFrame
@@ -176,5 +199,10 @@ def main():
     plt.xticks(rotation=90)
     plt.tight_layout()
     st.pyplot(fig)
+
+    # Display payback period information
+    st.write("Payback Period (days) per Scenario")
+    st.write(results_df[['Scenario', 'Payback Period (days)']])
+
 if __name__ == "__main__":
     main()

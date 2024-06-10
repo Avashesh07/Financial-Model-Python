@@ -16,8 +16,8 @@ def calculate_co2_cost(co2_price, co2_quantity):
 def calculate_water_cost(water_price, water_quantity):
     return water_price * water_quantity
 
-def calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, water_cost, annualized_capex, profit_duration_days):
-    return electricity_cost + hydrogen_cost + co2_cost + water_cost + annualized_capex/profit_duration_days
+def calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, water_cost, annualized_capex, profit_frequency_annually):
+    return electricity_cost + hydrogen_cost + co2_cost + water_cost + annualized_capex/profit_frequency_annually
 
 def calculate_profit(revenue, total_cost):
     return revenue - total_cost
@@ -58,7 +58,9 @@ def main():
     annualized_capex_esaf_production = capex_esaf_production / useful_life_years
 
     # Number of days it takes to generate the profit for all the scenarios
-    profit_duration_days = st.number_input("Enter the number of days it takes to return a profit:", value=1) 
+    profit_duration = st.number_input("Enter the number of days it takes to return a profit:", value=1) 
+
+    profit_frequency_annually = 365/profit_duration
 
     # Initialize results list
     results = []
@@ -148,7 +150,7 @@ def main():
             if not re.search(r'\bEP\b', scenario):
                 hydrogen_cost += calculate_hydrogen_cost(hydrogen_price, hydrogen_quantity)  # Hydrogen cost if not produced internally
 
-        total_production_cost = calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, water_cost, annualized_capex, profit_duration_days)
+        total_production_cost = calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, water_cost, annualized_capex, profit_frequency_annually)
 
         profit = calculate_profit(revenue, total_production_cost)
 

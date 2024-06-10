@@ -17,7 +17,7 @@ def calculate_water_cost(water_price, water_quantity):
     return water_price * water_quantity
 
 def calculate_total_production_cost(electricity_cost, hydrogen_cost, co2_cost, water_cost, annualized_capex):
-    return electricity_cost + hydrogen_cost + co2_cost + water_cost + annualized_capex
+    return electricity_cost + hydrogen_cost + co2_cost + water_cost + annualized_capex/365
 
 def calculate_profit(revenue, total_cost):
     return revenue - total_cost

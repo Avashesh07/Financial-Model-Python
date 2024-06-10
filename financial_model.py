@@ -107,14 +107,14 @@ def main():
         elif not re.search(r'\bW\b', scenario) and re.search(r'\bEP\b', scenario):
             water_cost += calculate_water_cost(water_price, water_quantity)
 
-        # Check if we supply electricity
-        if re.search(r'\bE\b', scenario) and not re.search(r'\b(EP)\b', scenario):
-            revenue += electricity_price * electrolysis_ratio  # Revenue from selling electricity
-            electricity_cost = 0  # No production cost if just selling electricity
-        
         if re.search(r'\bE\b', scenario) and not re.search(r'\b(C)\b', scenario):
             revenue += electricity_price * electrolysis_ratio  # Revenue from selling electricity
-            electricity_cost += electricity_price * fractionation_ratio
+            # Check if we supply electricity
+            if re.search(r'\bE\b', scenario) and not re.search(r'\b(EP)\b', scenario):
+                revenue += electricity_price * electrolysis_ratio  # Revenue from selling electricity
+                electricity_cost = 0  # No production cost if just selling electricity
+            else:
+                electricity_cost += electricity_price * fractionation_ratio
 
         if re.search(r'\bEP\b', scenario) and not re.search(r'\bC\b', scenario):
             revenue += hydrogen_price * hydrogen_quantity  # Revenue from selling hydrogen

@@ -57,10 +57,9 @@ def main():
     annualized_capex_co2_capture = capex_co2_capture / useful_life_years
     annualized_capex_esaf_production = capex_esaf_production / useful_life_years
 
-    # Number of days it takes to generate the profit for all the scenarios
-    profit_duration = st.number_input("Enter the number of days it takes to return a profit:", value=1) 
 
-    profit_frequency_annually = 365/profit_duration
+
+    profit_frequency_annually = 365
 
     # Initialize results list
     results = []
